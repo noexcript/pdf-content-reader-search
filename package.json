@@ -1,14 +1,22 @@
 {
   "name": "read-pdf-content",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "./src/index.ts",
+  "scripts": {
+    "start": "ts-node ./src/index.ts"
+  },
   "repository": "git@github.com:noexcript/pdf-content-reader-search.git",
   "author": "Noah Magalhaes <noexcript@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@types/node": "^22.4.0",
     "pdf-parse": "^1.1.1",
-    "tesseract.js": "^5.1.0",
+    "tesseract.js": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.4.0",
+    "@types/pdf-parse": "^1.1.4",
+    "@types/tesseract.js": "^2.0.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
   }
 }

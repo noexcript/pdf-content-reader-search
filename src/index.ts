@@ -24,42 +24,55 @@ class PDFContentReader {
 
         }
     }
-    public extractTextFromScannedPDF = async (imagesPath: string): Promise<any> => {
+    public extractTextFromScannedPDF = async (filePath: string): Promise<any> => {
+        const imagesPath = filePath; // O diretório onde as imagens estão localizadas
+        let extractedText = '';
 
-        let extractedText: string = ''
-        const imageFiles = await fs.readFile(imagesPath)
+        try {
+            const imageFiles = await fs.readdir(imagesPath);
 
-        for (const imageFile in imageFiles) {
-            const imagePath = path.join(imagesPath, imageFile)
-            console.log('Processando Image ' + imagePath)
+            for (const imageFile of imageFiles) {
+                const imagePath = path.join(imagesPath, imageFile);
+                const buffer = await fs.readFile(imagePath)
+                console.log(`Processando imagem ${imagePath}`);
+                console.log(buffer)
 
-            const result = await Tesseract.recognize(imagePath, 'eng')
-
-            extractedText += result.data.text
+                const { data: { text } } = await Tesseract.recognize(buffer, 'eng');
+                extractedText += text;
+            }
+        } catch (error) {
+            console.error(`Erro ao processar imagens para OCR:`, error);
         }
 
         return extractedText;
     }
 
     public searchPDFsInDirectory = async (directoryPath: string, searchTerm: string): Promise<void> => {
+        const filesFound: any = []
         try {
             const files = await fs.readdir(directoryPath)
-            const pdfFiles = files.filter((file: any) => file.extname(file).toLowerCase() === '.pdf')
+            const pdfFiles = files.filter((file: any) => path.extname(file).toLowerCase() === '.pdf')
 
             for (const file of pdfFiles) {
                 const filePath = path.join(directoryPath, file)
-                console.log('Processando o arquivo ' + filePath)
-
                 let text = await this.extractTextFromPDF(filePath)
+                if (text.includes(searchTerm))
+                    filesFound.push(file)
 
-                if (text.includes(searchTerm)) {
-                    console.log(`Termo "${searchTerm}" encontrado no arquivo ${file}`)
-                } else {
-                    console.log(`Termo "${searchTerm}" encontrado no arquivo ${file}`)
-                }
             }
+            return filesFound
         } catch (error) {
             console.error('Erro ao ler o diretório ou processar arquivos:', error);
         }
     }
 }
+
+const readerPDF = new PDFContentReader()
+const directoryPath = './src/pdfs'
+const searchTerm = 'Nacional'
+
+
+readerPDF.searchPDFsInDirectory(directoryPath, searchTerm)
+    .then((files) => console.log(files))
+    .catch(error => console.error('Erro durante a pesquisa:', error));
+
